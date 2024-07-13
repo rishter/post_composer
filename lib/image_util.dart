@@ -1,4 +1,9 @@
 import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
+
 import 'package:gal/gal.dart';
 
 _checkAccess() async {
@@ -8,22 +13,56 @@ _checkAccess() async {
   }
 }
 
-Future<void> _saveImage(imageController) async {
-  Uint8List bytes = await imageController.capture();
-  await Gal.putImageBytes(bytes);
+Future<Uint8List?> captureImage(GlobalKey key) async {
+  try {
+    RenderRepaintBoundary? boundary =
+        key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) {
+      print("Boundary is null");
+      return null;
+    }
+    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) {
+      print("ByteData is null");
+      return null;
+    }
+    return byteData.buffer.asUint8List();
+  } catch (e) {
+    print("Error capturing image: $e");
+    return null;
+  }
 }
 
-saveImages(imageControllers) async {
+saveImages(List<GlobalKey> imageKeys, Function(int) switchToIndex) async {
   await _checkAccess();
 
-  List<Future<void>> futures = imageControllers.map((ic) => _saveImage(ic)).toList();
-  try {
-    await Future.wait(futures);
-  } on GalException catch (e) {
-    print(e.type.message);
+  for (int i = 0; i < imageKeys.length; i++) {
+    await switchToIndex(i);
+
+    // Wait for the slide to be visible and rendered
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    Uint8List? pngBytes = await captureImage(imageKeys[i]);
+    if (pngBytes != null) {
+      try {
+        await Gal.putImageBytes(pngBytes);
+        print("Saved image $i");
+      } catch (e) {
+        print("Failed to save image $i: $e");
+      }
+    } else {
+      print("Failed to capture image $i");
+    }
   }
 
-  await Gal.open();
+  try {
+    await Gal.open();
+  } on GalException catch (e) {
+    print(e.type.message);
+  } catch (e) {
+    print("Unexpected error: $e");
+  }
 }
 
 // Exception Type

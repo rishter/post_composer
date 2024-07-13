@@ -4,17 +4,15 @@ import 'image_util.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
-import 'package:widgets_to_image/widgets_to_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 
 /*
 backlog: 
-  * multiple slides
-    * switch to screenshot: https://pub.dev/packages/screenshot
-    * new slide updates currentindex
-    * remove slides
   * deployment
-  * persist data?
+  * persist data? 
+    * seperate named posts in a list?
+  * backlog
+    * hide delete when there is only one slide?
 */
 
 class PostComposerApp extends StatelessWidget {
@@ -40,12 +38,18 @@ class PostComposerHomePage extends HookWidget {
   Widget build(BuildContext context) {
     final editingMode = useState(false);
     final postCount = useState(1);
-    final imageControllers =
-        useState(<WidgetsToImageController>[WidgetsToImageController()]);
+    final imageKeys = useState<List<GlobalKey>>([GlobalKey()]);
     final postContents = useState<List<String>>([""]);
-    final swiperController = SwiperController();
+    final captureMode = useState(false);
 
-    addSlide() {
+    final swiperController = useMemoized(() => SwiperController(), []);
+
+    canAddNewSlide() => postCount.value < 10;
+    canRemoveSlide() => postCount.value > 1;
+
+    void addSlide() {
+      if (!canAddNewSlide()) return;
+
       final oldCount = postCount.value;
       editingMode.value = false;
       postCount.value += 1;
@@ -53,12 +57,37 @@ class PostComposerHomePage extends HookWidget {
       newContents.add("");
       postContents.value = newContents;
 
-      final newImageControllers =
-          List<WidgetsToImageController>.from(imageControllers.value);
-      newImageControllers.add(WidgetsToImageController());
-      imageControllers.value = newImageControllers;
+      final newImageKeys = List<GlobalKey>.from(imageKeys.value);
+      newImageKeys.add(GlobalKey());
+      imageKeys.value = newImageKeys;
 
-      print(swiperController.index);
+      swiperController.move(oldCount);
+    }
+
+    void removeSlide(index) {
+      if (!canRemoveSlide()) return;
+      swiperController.previous();
+
+      final oldCount = postCount.value;
+      editingMode.value = false;
+      postCount.value -= 1;
+
+      final newContents = List<String>.from(postContents.value);
+      newContents.removeAt(index);
+      postContents.value = newContents;
+
+      final newImageKeys = List<GlobalKey>.from(imageKeys.value);
+      newImageKeys.removeAt(index);
+      imageKeys.value = newImageKeys;
+
+      swiperController.move(oldCount);
+    }
+
+    Future<void> captureAndSaveImages() async {
+      editingMode.value = false; // Ensure we're not in editing mode
+      await saveImages(imageKeys.value, (index) async {
+        swiperController.move(index);
+      });
     }
 
     return CupertinoPageScaffold(
@@ -67,8 +96,8 @@ class PostComposerHomePage extends HookWidget {
         middle: const Text('Post Composer'),
         trailing: CupertinoButton(
           padding: const EdgeInsets.all(0.0),
-          onPressed: addSlide,
-          child: const Text('+'),
+          onPressed: canAddNewSlide() ? addSlide : null,
+          child: const Text('New Slide'),
         ),
       ),
       child: SafeArea(
@@ -81,17 +110,14 @@ class PostComposerHomePage extends HookWidget {
                   swiperController: swiperController,
                   editingMode: editingMode,
                   postCount: postCount.value,
-                  imageControllers: imageControllers.value,
+                  imageKeys: imageKeys.value,
                   postContents: postContents,
+                  removeSlide: removeSlide,
                 ),
               ),
             ),
             CupertinoButton(
-              onPressed: editingMode.value
-                  ? null
-                  : () async {
-                      await saveImages(imageControllers.value);
-                    },
+              onPressed: editingMode.value ? null : captureAndSaveImages,
               child: Text(
                   postCount.value > 1 ? 'Download Images' : 'Download Image'),
             ),
@@ -108,15 +134,19 @@ class PostSwiper extends HookWidget {
     required this.swiperController,
     required this.editingMode,
     required this.postCount,
-    required this.imageControllers,
+    required this.imageKeys,
     required this.postContents,
+    required this.removeSlide,
+    this.captureMode = false,
   }) : super();
 
   final SwiperController swiperController;
   final ValueNotifier<bool> editingMode;
   final int postCount;
-  final List<WidgetsToImageController> imageControllers;
+  final List<GlobalKey> imageKeys;
   final ValueNotifier<List<String>> postContents;
+  final Function removeSlide;
+  final bool captureMode;
 
   @override
   Widget build(BuildContext context) {
@@ -135,12 +165,23 @@ class PostSwiper extends HookWidget {
         ],
       ),
       child: Swiper(
+        itemCount: postCount,
         itemBuilder: (BuildContext context, int index) {
-          return WidgetsToImage(
-            controller: imageControllers[index],
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 40.0, horizontal: 22.0),
+          return RepaintBoundary(
+            key: imageKeys[index],
+            child: CupertinoContextMenu(
+              actions: [
+                CupertinoContextMenuAction(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    removeSlide(index);
+                  },
+                  isDestructiveAction: true,
+                  trailingIcon: CupertinoIcons.delete,
+                  child: const Text('Delete Slide'),
+                )
+              ],
+              enableHapticFeedback: true,
               child: PostContent(
                 key: ValueKey(index),
                 editingMode: editingMode,
@@ -154,7 +195,6 @@ class PostSwiper extends HookWidget {
             ),
           );
         },
-        itemCount: postCount,
         loop: false,
         pagination: SwiperPagination(
           builder: DotSwiperPaginationBuilder(
@@ -192,17 +232,20 @@ class PostContent extends HookWidget {
       return null;
     }, [textController]);
 
-    return editingMode.value
-        ? PostTextField(
-            controller: textController,
-            editingMode: editingMode,
-            focusNode: focusNode)
-        : GestureDetector(
-            onTap: () {
-              editingMode.value = true;
-            },
-            child: Text(text, style: Styles.comicSansText),
-          );
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 22.0),
+      child: editingMode.value
+          ? PostTextField(
+              controller: textController,
+              editingMode: editingMode,
+              focusNode: focusNode)
+          : GestureDetector(
+              onTap: () {
+                editingMode.value = true;
+              },
+              child: Text(text, style: Styles.comicSansText),
+            ),
+    );
   }
 }
 
