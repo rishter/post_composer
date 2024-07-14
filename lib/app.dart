@@ -8,9 +8,9 @@ import 'package:card_swiper/card_swiper.dart';
 
 /*
 backlog: 
-  * deployment
   * persist data? 
     * seperate named posts in a list?
+  * what's the deal with the image?
   * backlog
     * hide delete when there is only one slide?
 */
@@ -40,7 +40,6 @@ class PostComposerHomePage extends HookWidget {
     final postCount = useState(1);
     final imageKeys = useState<List<GlobalKey>>([GlobalKey()]);
     final postContents = useState<List<String>>([""]);
-    final captureMode = useState(false);
 
     final swiperController = useMemoized(() => SwiperController(), []);
 
@@ -284,6 +283,9 @@ class PostTextField extends StatelessWidget {
         style: Styles.comicSansText,
         maxLines: 12,
         enableSuggestions: false,
+        spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
+        autocorrect: false,
+        autofocus: true,
       ),
     );
   }

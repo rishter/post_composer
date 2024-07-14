@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'alert_util.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 
@@ -11,6 +13,11 @@ _checkAccess() async {
   if (!hasAccess) {
     await Gal.requestAccess();
   }
+}
+
+// not sure how to make this work async
+_alertError(BuildContext context, String message) {
+  showAlert(context, "Error", message);
 }
 
 Future<Uint8List?> captureImage(GlobalKey key) async {
