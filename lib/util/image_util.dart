@@ -1,12 +1,16 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/services.dart';
+
 import 'alert_util.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:gal/gal.dart';
+import 'package:jpeg_encode/jpeg_encode.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 import 'styles.dart';
 
@@ -56,8 +60,8 @@ saveImages(List<GlobalKey> imageKeys, Function(int) switchToIndex) async {
     Uint8List? pngBytes = await captureImage(imageKeys[i]);
     if (pngBytes != null) {
       try {
-        await Gal.putImageBytes(pngBytes);
-        print("Saved image $i");
+        // await Gal.putImageBytes(pngBytes);
+        await ImageGallerySaver.saveImage(pngBytes);
       } catch (e) {
         print("Failed to save image $i: $e");
       }
