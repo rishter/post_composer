@@ -30,7 +30,7 @@ class PostListHomePage extends HookWidget {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text("Rishi's IG Composer"),
+        middle: const Text("Rishi's Instagram Post Composer"),
         trailing: CupertinoButton(
           padding: const EdgeInsets.all(0.0),
           onPressed: () async {
@@ -43,33 +43,95 @@ class PostListHomePage extends HookWidget {
             );
             loadPosts();
           },
-          child: const Text('New Post'),
+          child: const Icon(CupertinoIcons.plus),
         ),
       ),
       child: SafeArea(
         child: posts.value.isNotEmpty
             ? CupertinoListSection.insetGrouped(
                 children: posts.value
-                    .map((Post p) => CupertinoListTile.notched(
-                          title: Text(p.name),
-                          subtitle: Text(p.dateString()),
-                          additionalInfo: Text('${p.slides.length} slides'),
-                          trailing: const CupertinoListTileChevron(),
-                          onTap: () async {
-                            await Navigator.of(context)
-                                .push(CupertinoPageRoute<void>(
-                              builder: (BuildContext context) {
-                                return PostComposer(loadedPost: p);
-                              },
-                            ));
-                            loadPosts();
-                          },
+                    .map((Post p) => PostListItem(
+                          post: p,
+                          loadPosts: loadPosts,
                         ))
                     .toList())
             : const Empty(),
       ),
     );
   }
+}
+
+class PostListItem extends StatelessWidget {
+  const PostListItem({
+    super.key,
+    required this.post,
+    required this.loadPosts,
+  }) : super();
+
+  final Post post;
+  final Function loadPosts;
+
+  @override
+  Widget build(BuildContext context) {
+    return SwipeActionCell(
+      key: ObjectKey(post),
+      trailingActions: <SwipeAction>[
+        SwipeAction(
+            icon: const Icon(
+              CupertinoIcons.trash,
+              color: CupertinoColors.white,
+            ),
+            widthSpace: 60,
+            onTap: (CompletionHandler handler) async {
+              _showDeleteAlert(context, post.id!, loadPosts);
+            },
+            color: CupertinoColors.destructiveRed),
+      ],
+      child: CupertinoListTile.notched(
+        title: Text(post.name),
+        subtitle: Text(post.dateString()),
+        additionalInfo: Text('${post.slides.length} slides'),
+        trailing: const CupertinoListTileChevron(),
+        backgroundColor: CupertinoColors.white,
+        onTap: () async {
+          await Navigator.of(context).push(CupertinoPageRoute<void>(
+            builder: (BuildContext context) {
+              return PostComposer(loadedPost: post);
+            },
+          ));
+          loadPosts();
+        },
+      ),
+    );
+  }
+}
+
+void _showDeleteAlert(BuildContext context, int postId, Function loadPosts) {
+  showCupertinoModalPopup<void>(
+    context: context,
+    builder: (BuildContext context) => CupertinoAlertDialog(
+      title: const Text("Delete post?"),
+      content: const Text("This action cannot be undone."),
+      actions: <CupertinoDialogAction>[
+        CupertinoDialogAction(
+          isDefaultAction: true,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('No'),
+        ),
+        CupertinoDialogAction(
+          isDestructiveAction: true,
+          onPressed: () async {
+            Navigator.pop(context);
+            await deletePost(postId);
+            await loadPosts();
+          },
+          child: const Text('Yes'),
+        ),
+      ],
+    ),
+  );
 }
 
 class Empty extends StatelessWidget {

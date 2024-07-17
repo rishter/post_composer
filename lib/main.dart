@@ -12,7 +12,6 @@ one day there will be a script that:
 
 /*
 backlog: 
-  * delete posts https://pub.dev/documentation/flutter_swipe_action_cell/latest/
   * icebox
     * delete all slides following this one
     * focus on new slide text field when adding new slide
