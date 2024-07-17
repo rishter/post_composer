@@ -12,13 +12,13 @@ one day there will be a script that:
 
 /*
 backlog: 
+  * what's the deal with the image?
+  * delete posts https://pub.dev/documentation/flutter_swipe_action_cell/latest/
   * clear all slides
   * editing mode bug
-  * persist posts 
-    * delete posts https://pub.dev/documentation/flutter_swipe_action_cell/latest/
   * style empty post container
-  * what's the deal with the image?
   * icebox
+    * focus on new slide text field when adding new slide
     * make the context menu action go on the entire post not just the text
     * undo / redo
     * hide delete when there is only one slide?
