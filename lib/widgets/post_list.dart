@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:post_composer/models/slide.dart';
+import 'package:post_composer/util/styles.dart';
 import '../models/post.dart';
 import 'post_composer.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
@@ -29,7 +30,7 @@ class PostListHomePage extends HookWidget {
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Post List'),
+        middle: const Text("Rishi's IG Composer"),
         trailing: CupertinoButton(
           padding: const EdgeInsets.all(0.0),
           onPressed: () async {
@@ -76,6 +77,22 @@ class Empty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text("EMPTY!"));
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Transform.scale(
+            scale: 2,
+            child: Icon(
+              CupertinoIcons.rocket_fill,
+              color: Styles.shadowGrey,
+            ),
+          ),
+          const SizedBox(height: 30.0),
+          const Text("Let's get started!")
+        ],
+      ),
+    );
   }
 }

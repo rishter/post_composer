@@ -13,9 +13,8 @@ one day there will be a script that:
 /*
 backlog: 
   * delete posts https://pub.dev/documentation/flutter_swipe_action_cell/latest/
-  * clear all slides
-  * style empty post container
   * icebox
+    * delete all slides following this one
     * focus on new slide text field when adding new slide
     * make the context menu action go on the entire post not just the text
     * undo / redo

@@ -241,7 +241,7 @@ class PostSwiper extends HookWidget {
                   isDestructiveAction: true,
                   trailingIcon: CupertinoIcons.delete,
                   child: const Text('Delete Slide'),
-                )
+                ),
               ],
               enableHapticFeedback: true,
               child: SlideComposer(
