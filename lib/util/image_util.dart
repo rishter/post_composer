@@ -8,6 +8,8 @@ import 'package:flutter/rendering.dart';
 
 import 'package:gal/gal.dart';
 
+import 'styles.dart';
+
 _checkAccess() async {
   final hasAccess = await Gal.hasAccess();
   if (!hasAccess) {
@@ -28,7 +30,8 @@ Future<Uint8List?> captureImage(GlobalKey key) async {
       print("Boundary is null");
       return null;
     }
-    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+    ui.Image image =
+        await boundary.toImage(pixelRatio: Styles.invertScaleFactor);
     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     if (byteData == null) {
       print("ByteData is null");
