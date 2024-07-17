@@ -9,7 +9,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 
 import 'package:gal/gal.dart';
-import 'package:jpeg_encode/jpeg_encode.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 import 'styles.dart';
