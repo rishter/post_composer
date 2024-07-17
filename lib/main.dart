@@ -11,14 +11,13 @@ one day there will be a script that:
 */
 
 /*
-backlog: 
-  * icebox
-    * delete all slides following this one
-    * focus on new slide text field when adding new slide
-    * make the context menu action go on the entire post not just the text
-    * undo / redo
-    * hide delete when there is only one slide?
-    * save as album
+icebox:
+  * delete all slides following this one
+  * focus on new slide text field when adding new slide
+  * make the context menu action go on the entire post not just the text
+  * undo / redo
+  * hide delete when there is only one slide?
+  * save as album
 */
 
 void main() {
