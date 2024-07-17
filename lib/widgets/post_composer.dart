@@ -347,7 +347,6 @@ class SlideTextField extends HookWidget {
         maxLines: 12,
         enableSuggestions: false,
         spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
-        autocorrect: false,
         autofocus: true,
         onChanged: onChanged,
       ),

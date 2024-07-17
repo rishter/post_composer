@@ -3,15 +3,9 @@ import 'package:flutter/services.dart';
 import 'widgets/post_list.dart';
 import 'package:post_composer/util/db.dart';
 
-/* 
-one day there will be a script that:
-1. runs `flutter build ios --release` 
-2. copies /build/ios/iphoneos/Runner.app to a new folder titled "Payload"
-3. compresses Payload into a zip file, and changes extension to .ipa
-*/
-
 /*
 icebox:
+  * fix build_ipa.sh
   * delete all slides following this one
   * focus on new slide text field when adding new slide
   * make the context menu action go on the entire post not just the text
