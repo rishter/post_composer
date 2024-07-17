@@ -90,7 +90,8 @@ class PostListItem extends StatelessWidget {
       child: CupertinoListTile.notched(
         title: Text(post.name),
         subtitle: Text(post.dateString()),
-        additionalInfo: Text('${post.slides.length} slides'),
+        additionalInfo: Text(
+            '${post.slides.length} slide${post.slides.length > 1 ? 's' : ''}'),
         trailing: const CupertinoListTileChevron(),
         backgroundColor: CupertinoColors.white,
         onTap: () async {

@@ -5,6 +5,7 @@ import 'package:post_composer/util/db.dart';
 
 /*
 icebox:
+  * # slide(s) when it's only 1 on post listh
   * fix build_ipa.sh
   * delete all slides following this one
   * focus on new slide text field when adding new slide
